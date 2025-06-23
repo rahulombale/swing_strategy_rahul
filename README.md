@@ -1,138 +1,91 @@
-# V20 Stock Trading Strategy Backtester
+# Python-Based Stock Trading Strategy Backtester
 
-This repository contains a Python script designed to backtest the "V20" stock trading strategy on historical daily candlestick data. The script is optimized for use in Google Colab, leveraging Google Drive for file storage and Plotly for generating interactive trade visualizations.
+This repository contains Python scripts designed to backtest distinct quantitative trading strategies on historical stock data. The scripts are built using `pandas` for data manipulation and `plotly` for interactive charting, all within the Google Colab environment.
 
-It systematically analyzes multiple lists of stocks, applies a specific pattern-based trading logic, and generates detailed reports on both **completed trades** (realized profit/loss) and **open trades** (unrealized profit/loss as of the backtest end date).
+Each script is a self-contained backtesting engine capable of processing lists of stocks, applying a specific set of rules, and generating detailed reports on trade performance.
 
-## Key Features
+## Strategies Implemented
 
-* **Core V20 Strategy:** Identifies setups based on a strong upward momentum (>20% gain in a series of green candles) and trades the subsequent retracement.
-* **Batch Processing:** Iterates through multiple source files (`v40_token.csv`, `v40next_token.csv`, `v200_token.csv`) to test the strategy against different stock universes.
-* **Advanced Rules Engine:**
-    * **V200 SMA Filter:** Applies a 200-day Simple Moving Average (SMA) filter for stocks in the `v200_token.csv` list, ensuring buys occur below this key technical level.
-    * **Pyramiding/Re-investment:** Allows for a single, slightly larger re-investment in a stock from the V40 lists if a second opportunity arises.
-* **Interactive Visualizations:** Automatically generates a Plotly candlestick chart for every completed trade, visually mapping the setup period, entry/exit points, and key price levels.
-* **Comprehensive Reporting:** Produces two distinct CSV reports:
-    1.  `completed_trades_summary_v20.csv`: A detailed log of all trades that were successfully entered and exited.
-    2.  `open_trades_summary_v20.csv`: A snapshot of all trades that were entered but had not hit their sell target by the end of the historical data period.
+This repository includes backtesters for the following two strategies:
 
-## The V20 Trading Strategy
+1.  **V20 Momentum Strategy**
+2.  **Moving Average Contrarian Strategy**
 
-The strategy is executed based on a clear, four-step mechanical process:
+---
 
-1.  **Setup Identification:** The script scans for a group of continuous green candles (where `close > open`). This group only qualifies as a setup if the price gain from the period's lowest low to its highest high exceeds **20%**.
-2.  **Range Definition:** Once a valid setup is found, a trading range is defined by its `lowest_low` (the entry level) and its `highest_high` (the exit target).
-3.  **Buy Execution:** After the setup period, the script waits for the price to retrace. A **buy** order is triggered the first time the daily low touches or drops below the `lowest_low` of the setup range.
-4.  **Sell Execution:** After a position is entered, a **sell** order is triggered the first time the daily high touches or exceeds the `highest_high` of the setup range.
+### 1. V20 Momentum Strategy
 
-## Prerequisites & Setup
+This is a momentum-based, swing trading strategy that aims to capitalize on strong upward thrusts and subsequent retracements.
 
-* A Google Account (for Google Drive and Google Colab).
-* Python 3 environment (provided by Google Colab).
-* Required Python libraries: `pandas` and `plotly`. The script assumes these are available in the Colab environment.
+#### **Strategy Logic**
 
-## Required File Structure
+1.  **Setup:** Identifies a sequence of continuous green candles where the price gain from the period's lowest low to its highest high exceeds **20%**.
+2.  **Range:** Defines a trading range based on the setup's `lowest_low` (buy level) and `highest_high` (sell target).
+3.  **Buy Signal:** Triggers a buy order when the price retraces and touches the `lowest_low` after the setup is complete.
+4.  **Sell Signal:** Triggers a sell order when the price rallies and touches the `highest_high` after the position is entered.
 
-For the script to run correctly, you **must** organize your files on Google Drive exactly as shown below.
+#### **Special Rules**
+* **Stock Universes:** Applicable to `v40_token.csv`, `v40next_token.csv`, and `v200_token.csv`.
+* **V200 Filter:** For stocks from the `v200` list, the buy signal is only valid if the entry price is also below the 200-day SMA.
+* **Pyramiding:** For `v40` and `v40next` stocks, allows for **one** additional re-investment with 3% more capital if a second, distinct setup occurs after a trade is completed.
 
+---
 
-Certainly. It seems the previous response was cut off. My apologies for that.
+### 2. Moving Average Contrarian Strategy
 
-Here is the complete README.md content in raw Markdown format for you to copy and paste.
+This is a contrarian, trend-following strategy designed to buy into extreme pessimism and sell into extreme optimism, based on the alignment of key moving averages.
 
-Markdown
+#### **Strategy Logic**
 
-# V20 Stock Trading Strategy Backtester
+1.  **Philosophy:** Buys when short, mid, and long-term traders are theoretically at a loss. Sells when all are in profit.
+2.  **Buy Signal:** Triggers a buy order on the next day's open when the previous day's close satisfies the condition: `Close < 20 SMA < 50 SMA < 200 SMA`.
+3.  **Sell Signal:** Triggers a sell order on the next day's open when the previous day's close satisfies the condition: `Close > 20 SMA > 50 SMA > 200 SMA`.
 
-This repository contains a Python script designed to backtest the "V20" stock trading strategy on historical daily candlestick data. The script is optimized for use in Google Colab, leveraging Google Drive for file storage and Plotly for generating interactive trade visualizations.
+#### **Special Rules**
+* **Stock Universe:** Applicable **only** to stocks from `v40_token.csv`.
+* **Averaging Down:** If in a position, allows for **one** additional buy (averaging down) if the price drops 10% below the initial entry price. This is preferred over taking a new trade.
+* **Chart Colors:** Plots use Green (20 SMA), Red (50 SMA), and Black (200 SMA).
 
-It systematically analyzes multiple lists of stocks, applies a specific pattern-based trading logic, and generates detailed reports on both **completed trades** (realized profit/loss) and **open trades** (unrealized profit/loss as of the backtest end date).
+---
 
-## Key Features
+## Common Features & Architecture
 
-* **Core V20 Strategy:** Identifies setups based on a strong upward momentum (>20% gain in a series of green candles) and trades the subsequent retracement.
-* **Batch Processing:** Iterates through multiple source files (`v40_token.csv`, `v40next_token.csv`, `v200_token.csv`) to test the strategy against different stock universes.
-* **Advanced Rules Engine:**
-    * **V200 SMA Filter:** Applies a 200-day Simple Moving Average (SMA) filter for stocks in the `v200_token.csv` list, ensuring buys occur below this key technical level.
-    * **Pyramiding/Re-investment:** Allows for a single, slightly larger re-investment in a stock from the V40 lists if a second opportunity arises.
-* **Interactive Visualizations:** Automatically generates a Plotly candlestick chart for every completed trade, visually mapping the setup period, entry/exit points, and key price levels.
-* **Comprehensive Reporting:** Produces two distinct CSV reports:
-    1.  `completed_trades_summary_v20.csv`: A detailed log of all trades that were successfully entered and exited.
-    2.  `open_trades_summary_v20.csv`: A snapshot of all trades that were entered but had not hit their sell target by the end of the historical data period.
+Both scripts share a common set of features and operating requirements.
 
-## The V20 Trading Strategy
-
-The strategy is executed based on a clear, four-step mechanical process:
-
-1.  **Setup Identification:** The script scans for a group of continuous green candles (where `close > open`). This group only qualifies as a setup if the price gain from the period's lowest low to its highest high exceeds **20%**.
-2.  **Range Definition:** Once a valid setup is found, a trading range is defined by its `lowest_low` (the entry level) and its `highest_high` (the exit target).
-3.  **Buy Execution:** After the setup period, the script waits for the price to retrace. A **buy** order is triggered the first time the daily low touches or drops below the `lowest_low` of the setup range.
-4.  **Sell Execution:** After a position is entered, a **sell** order is triggered the first time the daily high touches or exceeds the `highest_high` of the setup range.
-
-## Prerequisites & Setup
-
-* A Google Account (for Google Drive and Google Colab).
-* Python 3 environment (provided by Google Colab).
-* Required Python libraries: `pandas` and `plotly`. The script assumes these are available in the Colab environment.
+* **Google Colab & Drive:** Designed to run in Google Colab, using Google Drive for file I/O.
+* **Batch & Single-Stock Mode:** A simple boolean toggle (`RUN_SINGLE_STOCK`) at the top of the main execution block allows you to switch modes:
+    * `True`: Runs the backtest for one specified stock and generates a detailed Plotly chart. Ideal for debugging and deep-dives.
+    * `False`: Runs the backtest for all stocks in the relevant source file(s). Ideal for generating aggregate performance statistics.
+* **Comprehensive Reporting:** Both scripts track and report two categories of trades:
+    1.  **Completed Trades:** Trades that have been both entered and exited.
+    2.  **Open Trades:** Positions that were entered but had not hit their sell condition by the end of the data period.
+* **CSV Output:** The results are saved into two separate `.csv` files for easy analysis (`completed_trades...` and `open_trades...`).
 
 ## Required File Structure
 
-For the script to run correctly, you **must** organize your files on Google Drive exactly as shown below.
+For the scripts to run, your files **must** be organized on Google Drive as follows:
 
 ```text
-
 /content/drive/My Drive/
 └── stock_data/
-├── 2025-06-17/                 &lt;-- Your data folder, name must match DATA_FOLDER_DATE
+├── 2025-06-17/                 &lt;-- Data folder, name must match DATA_FOLDER_DATE
 │   ├── ASIANPAINT-EQ.csv
 │   ├── RELIANCE-EQ.csv
-│   └── ... (all other stock data CSVs for the backtest)
+│   └── ... (all other stock data CSVs)
 │
 ├── v40_token.csv               &lt;-- Stock list file 1
 ├── v40next_token.csv           &lt;-- Stock list file 2
 └── v200_token.csv              &lt;-- Stock list file 3
-
 ```
 
-**Important Notes:**
+## How to Use
 
-* **Historical Data CSVs:** Each stock's data file (e.g., `ASIANPAINT-EQ.csv`) must contain the columns: `timestamp`, `open`, `high`, `low`, `close`.
-* **Stock List CSVs:** Each token list file (e.g., `v40_token.csv`) must contain a column named `ticker` that lists the corresponding stock data filenames.
-
-## How to Run the Backtest
-
-1.  **Organize Files:** Ensure your data files and stock lists are arranged in your Google Drive according to the structure described above.
-2.  **Open in Colab:** Upload or paste the Python script into a new Google Colab notebook.
-3.  **Configure Variables:** Review the variables in the "INPUT VARIABLES" section at the top of the script and adjust if necessary (e.g., `DATA_FOLDER_DATE`, `CAPITAL_PER_TRADE`).
-4.  **Execute Script:** Run all cells in the notebook (`Runtime` -> `Run all`).
-5.  **Authorize Drive:** When prompted, grant the notebook permission to access your Google Drive files.
-6.  **Analyze Results:** The script will print its progress. Upon completion, it will display summary tables in the output and save the detailed CSV reports to your `stock_data` folder on Google Drive.
-
-## Understanding the Output
-
-The script provides results in three primary ways:
-
-1.  **Console Logs:** Real-time updates on which stock list and which individual stock is being processed, along with success or failure messages for finding trades.
-2.  **Interactive Charts:** For every *completed* trade, a rich, interactive chart will be displayed directly in the Colab output, allowing you to visually inspect the trade.
-3.  **CSV Reports:** Two detailed CSV files are saved to your Google Drive:
-    * `completed_trades_summary_v20.csv`: Contains one row for each completed trade, with columns for entry/exit dates and prices, investment, and realized profit/loss.
-    * `open_trades_summary_v20.csv`: Contains one row for each position that was entered but not exited. It shows the unrealized P/L based on the last known price in the dataset.
-
-### Example CSV Output
-
-**Completed Trades:**
-
-| Stock       | Source File | Entry Date   | Exit Date    | Investment | Profit    | Profit % |
-| :---------- | :---------- | :----------- | :----------- | :--------- | :-------- | :------- |
-| RELIANCE-EQ | V40         | 2024-11-05   | 2024-12-10   | 99,980.00  | 21,420.00 | 21.42    |
-| ...         | ...         | ...          | ...          | ...        | ...       | ...      |
-
-**Open Trades:**
-
-| Stock   | Source File | Status | Entry Date   | Target Exit Price | Unrealized P/L | Unrealized P/L % |
-| :------ | :---------- | :----- | :----------- | :---------------- | :------------- | :--------------- |
-| INFY-EQ | V40Next     | Open   | 2025-05-20   | 1650.50           | -4,550.00      | -4.61            |
-| ...     | ...         | ...    | ...          | ...               | ...            | ...              |
+1.  **Organize Files:** Ensure your data and stock lists are in your Google Drive as per the structure above.
+2.  **Open in Colab:** Open the desired strategy script (`V20_Strategy.ipynb` or `MA_Strategy.ipynb`) in Google Colab.
+3.  **Select Mode:** In the main execution block, set the `RUN_SINGLE_STOCK` toggle to `True` or `False`. If `True`, specify the `TICKER_TO_TEST`.
+4.  **Run Script:** Execute all cells (`Runtime` -> `Run all`).
+5.  **Authorize Drive:** Grant the notebook permission to access your Google Drive when prompted.
+6.  **Analyze Results:** Review the output in the Colab console. The final summary tables will be printed, and the full CSV reports will be saved to your `stock_data` folder on Google Drive. If in single-stock mode, an interactive chart will also be displayed.
 
 ## License
 
